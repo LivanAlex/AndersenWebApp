@@ -18,9 +18,10 @@
                             <thead>
                             <tr>
                                 <th class="mdl-data-table__cell--non-numeric">#</th>
-                                <th>Number</th>
-                                <th>Manufacturer</th>
-                                <th>year</th>
+                                <th>номер</th>
+                                <th>марка</th>
+                                <th>модель</th>
+                                <th>год</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -36,8 +37,8 @@
                                     <td><c:out value="${car.model}"/></td>
                                     <td><c:out value="${car.year}"/></td>
                                     <td>
-                                        <a href="/edit?regNum=<c:out value='${car.regNum}'/>">Edit</a>&nbsp;&nbsp;&nbsp;&nbsp;
-                                        <a href="/delete?regNum=<c:out value='${car.regNum}'/>">Delete</a>
+                                        <a href="/edit?regNum=<c:out value='${car.regNum}'/>">Изменить</a>&nbsp;&nbsp;&nbsp;&nbsp;
+                                        <a href="/delete?regNum=<c:out value='${car.regNum}'/>">Удалить</a>
                                     </td>
                                 </tr>
                             </c:forEach>

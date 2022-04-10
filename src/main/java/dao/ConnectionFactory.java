@@ -1,43 +1,35 @@
 package dao;
 
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.Properties;
 
-public class ConnectionFactory {
+public class ConnectionFactory implements AutoCloseable {
 
     //  Database credentials
-    static final String DB_URL;
-    static final String USER;
-    static final String PASS;
-    static final String DRIVER;
-    static final String PROPERTIES_NAME;
+    private static final String PROPERTIES_NAME = "hikari@docker.properties";
+    private HikariDataSource hds;
 
-    static{
-        PROPERTIES_NAME = "postgres@docker.properties";
+    public ConnectionFactory() {
         Properties properties = new Properties();
         try {
             properties.load(ConnectionFactory.class.getClassLoader().getResourceAsStream(PROPERTIES_NAME));
+            HikariConfig cfg = new HikariConfig(properties);
+            hds = new HikariDataSource(cfg);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        DB_URL = properties.getProperty("url");
-        USER = properties.getProperty("username");
-        PASS = properties.getProperty("password");
-        DRIVER = properties.getProperty("driver-class-name");
     }
 
-    public static Connection getConnection(){
-        Connection connection = null;
-        try {
-            Class.forName(DRIVER);
-            connection = DriverManager.getConnection(DB_URL, USER, PASS);
-        } catch (ClassNotFoundException | SQLException e) {
-            e.printStackTrace();
-        }
-        return connection;
+    public HikariDataSource getHikariDataSource() {
+        return hds;
+    }
+
+    @Override
+    public void close() {
+        hds.close();
     }
 }

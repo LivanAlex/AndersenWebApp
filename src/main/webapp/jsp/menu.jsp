@@ -1,10 +1,10 @@
 <%@ page isELIgnored="false" %>
 <header class="mdl-layout__header">
     <div class="mdl-layout__header-row">
-        <%--    Title--%>
-        <span class="mdl-layout-title">Cars</span>
         <div class="mdl-layout-spacer"></div>
+        <span class="mdl-layout-title">Cars</span>
         <nav class="mdl-navigation mdl-layout--large-screen-only">
+            <a class="mdl-navigation__link" href="/carOfTheDay">Car of the day</a>
             <a class="mdl-navigation__link" href="/new">Add new car</a>
             <a class="mdl-navigation__link" href="/">List all cars</a>
         </nav>

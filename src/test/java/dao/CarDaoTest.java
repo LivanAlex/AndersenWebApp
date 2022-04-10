@@ -30,6 +30,16 @@ class CarDaoTest {
         testCar2.setModel("2101");
     }
 
+    void itShouldReturnInsertedCarAndPreviousCar() {
+        //given
+        //when
+        List<Car> carList = carDao.carOfTheDay();
+        Car carExpected = carDao.find(testCar.getRegNum()).orElse(new Car());
+        //then
+        Assertions.assertEquals(testCar, carExpected);
+        carDao.delete(testCar);
+    }
+
     @Test
     void itShouldSaveCarToDatabaseAndFindIt() {
         //given
