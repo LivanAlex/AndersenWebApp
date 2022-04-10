@@ -1,3 +1,4 @@
+<%@ page import="model.Car" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
@@ -11,17 +12,16 @@
 
     <form name="myForm" action="update" method="post" onsubmit="return validateForm()">
 
-
-        <c:choose>
-            <c:when test="${car =! null}">
-                pizza.
-                <br/>
-            </c:when>
-            <c:otherwise>
-                pizzas.
-                <br/>
-            </c:otherwise>
-        </c:choose>
+        <%
+            Car car = (Car) request.getAttribute("car");
+        %>
+        if(car != null){
+        pizza.
+        <br/>
+        } else {
+        pizzas.
+        <br/>
+        }
 
 
         <div class="mdl-textfield mdl-js-textfield">

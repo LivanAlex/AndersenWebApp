@@ -33,6 +33,7 @@
                                     </td>
                                     <td><c:out value="${car.regNum}"/></td>
                                     <td><c:out value="${car.manufacturer}"/></td>
+                                    <td><c:out value="${car.model}"/></td>
                                     <td><c:out value="${car.year}"/></td>
                                     <td>
                                         <a href="/edit?regNum=<c:out value='${car.regNum}'/>">Edit</a>&nbsp;&nbsp;&nbsp;&nbsp;
