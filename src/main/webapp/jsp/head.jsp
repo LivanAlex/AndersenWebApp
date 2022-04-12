@@ -10,7 +10,3 @@
         <%@ include file="../css/styles.css" %>
     </style>
 </head>
-<body>
-
-</body>
-</html>

@@ -59,19 +59,19 @@
                                 <div class="mdl-textfield mdl-js-textfield">
                                     <input class="mdl-textfield__input" type="text" name="manufacturer"
                                            value="<c:out value='${car.manufacturer}'/>" id="manufacturer"/>
-                                    <label class="mdl-textfield__label" for="manufacturer">Manufacturer</label>
+                                    <label class="mdl-textfield__label" for="manufacturer">manufacturer</label>
                                 </div>
 
                                 <div class="mdl-textfield mdl-js-textfield">
                                     <input class="mdl-textfield__input" type="text" name="model"
                                            value="<c:out value='${car.model}'/>" id="model"/>
-                                    <label class="mdl-textfield__label" for="model">Model</label>
+                                    <label class="mdl-textfield__label" for="model">model</label>
                                 </div>
 
                                 <div class="mdl-textfield mdl-js-textfield">
                                     <input class="mdl-textfield__input" type="text" name="year"
                                            value="<c:out value='${car.year}'/>" id="year"/>
-                                    <label class="mdl-textfield__label" for="year">Year</label>
+                                    <label class="mdl-textfield__label" for="year">year</label>
                                 </div>
                                 <input type="submit"
                                        class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"

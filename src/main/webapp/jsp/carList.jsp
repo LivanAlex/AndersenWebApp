@@ -37,8 +37,8 @@
                                     <td><c:out value="${car.model}"/></td>
                                     <td><c:out value="${car.year}"/></td>
                                     <td>
-                                        <a href="/edit?regNum=<c:out value='${car.regNum}'/>">Изменить</a>&nbsp;&nbsp;&nbsp;&nbsp;
-                                        <a href="/delete?regNum=<c:out value='${car.regNum}'/>">Удалить</a>
+                                        <a href="/edit?regNum=<c:out value='${car.regNum}'/>">edit</a>&nbsp;&nbsp;&nbsp;&nbsp;
+                                        <a href="/delete?regNum=<c:out value='${car.regNum}'/>">delete</a>
                                     </td>
                                 </tr>
                             </c:forEach>

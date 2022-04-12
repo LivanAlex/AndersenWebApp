@@ -1,4 +1,4 @@
-package code;
+package controller;
 
 import dao.CarDao;
 import model.Car;
@@ -13,14 +13,17 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * This class represents controller for Car model
+ */
 @WebServlet(name = "CarController", value = "/")
 public class CarController extends HttpServlet {
 
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        String action = request.getServletPath();
         request.setCharacterEncoding("utf-8");
+        String action = request.getServletPath();
         switch (action) {
             case "/new": {
                 showNewForm(request, response);
@@ -46,15 +49,32 @@ public class CarController extends HttpServlet {
                 carOfTheDay(request, response);
                 break;
             }
+            case "/error": {
+                error(request, response);
+                break;
+            }
             default:
                 listCars(request, response);
         }
     }
 
+
+
+    private void error(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        System.out.println(getServletContext().getContextPath());
+        getServletContext().getRequestDispatcher("/jsp/error.jsp").forward(request, response);
+
+    }
+
     private void carOfTheDay(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         List<Car> listCar = new CarDao().carOfTheDay();
-        request.setAttribute("listCar", listCar);
-        getServletContext().getRequestDispatcher("/jsp/CarOfTheDay.jsp").forward(request, response);
+        if (listCar != null){
+            request.setAttribute("listCar", listCar);
+            getServletContext().getRequestDispatcher("/jsp/carOfTheDay.jsp").forward(request, response);
+        } else {
+            response.sendRedirect("/error");
+        }
     }
 
     private void updateCar(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -67,7 +87,7 @@ public class CarController extends HttpServlet {
         String regNum = request.getParameter("regNum");
         Optional<Car> existingCar = new CarDao().find(regNum);
         existingCar.ifPresent(car -> request.setAttribute("car", car));
-        getServletContext().getRequestDispatcher("/jsp/CarForm.jsp").forward(request, response);
+        getServletContext().getRequestDispatcher("/jsp/carForm.jsp").forward(request, response);
     }
 
     private void deleteCar(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -93,14 +113,14 @@ public class CarController extends HttpServlet {
     }
 
     private void showNewForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        RequestDispatcher dispatcher = request.getRequestDispatcher("/jsp/CarForm.jsp");
+        RequestDispatcher dispatcher = request.getRequestDispatcher("/jsp/carForm.jsp");
         dispatcher.forward(request, response);
     }
 
     private void listCars(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         List<Car> listCar = new CarDao().findAll();
         request.setAttribute("listCar", listCar);
-        getServletContext().getRequestDispatcher("/jsp/CarList.jsp").forward(request, response);
+        getServletContext().getRequestDispatcher("/jsp/carList.jsp").forward(request, response);
     }
 
     @Override

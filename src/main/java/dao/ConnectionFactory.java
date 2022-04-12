@@ -5,6 +5,8 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Properties;
 
 public class ConnectionFactory implements AutoCloseable {
@@ -26,6 +28,10 @@ public class ConnectionFactory implements AutoCloseable {
 
     public HikariDataSource getHikariDataSource() {
         return hds;
+    }
+
+    public Connection getConnection() throws SQLException {
+        return hds.getConnection();
     }
 
     @Override

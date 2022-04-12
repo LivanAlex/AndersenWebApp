@@ -16,6 +16,11 @@
             <div class="mdl-grid center-items">
                 <div class="mdl-cell mdl-cell--4-col">
                     <div>
+                        <%
+                            List<Car> listCar = (List<Car>) request.getAttribute("listCar");
+                            if (listCar != null){
+                        %>
+
                         <h2>Машина дня:</h2>
                         <table class="mdl-data-table mdl-js-data-table mdl-data--selectable mdl-shadow--2dp">
                             <thead>
@@ -36,7 +41,6 @@
                             </tbody>
                         </table>
 
-
                         <h3>В прошлый раз машиной дня была:</h3>
                         <table class="mdl-data-table mdl-js-data-table mdl-data--selectable mdl-shadow--2dp">
                             <thead>
@@ -56,6 +60,17 @@
                             </tr>
                             </tbody>
                         </table>
+
+                        <%
+                            } else {
+                        %>
+
+                        <h3>Ой! что-то пошло не так...</h3>
+
+                        <%
+                            };
+                        %>
+
 
                     </div>
                 </div>
