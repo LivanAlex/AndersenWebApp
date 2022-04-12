@@ -3,7 +3,7 @@ package dao;
 
 import model.Car;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -28,8 +28,8 @@ class CarDaoTest {
     private static Car testCar;
     private static Car testCar2;
 
-    @BeforeAll
-    static void init() {
+    @BeforeEach
+    void init() {
         carDao = new CarDao();
 
         testCar = new Car();
@@ -43,6 +43,9 @@ class CarDaoTest {
         testCar2.setYear(1990);
         testCar2.setManufacturer("Ваз");
         testCar2.setModel("2101");
+
+        executeSqlScript("createCarTable.sql");
+        executeSqlScript("createCarOfTheDayTable.sql");
     }
 
 
@@ -56,7 +59,6 @@ class CarDaoTest {
     @Test
     void itShouldReturnNumberOfCarsInCarTable() throws NoSuchMethodException, SQLException, InvocationTargetException, IllegalAccessException {
         //given (create car table with 2 cars)
-        executeSqlScript("createCarTable.sql");
         executeSqlScript("insertCarsIntoCarTable.sql");
         //when
         ConnectionFactory factory = new ConnectionFactory();
@@ -67,7 +69,6 @@ class CarDaoTest {
         //then
         assertEquals(2, result);
 
-        executeSqlScript("truncateTableCar.sql");
         factory.close();
     }
 
@@ -82,8 +83,6 @@ class CarDaoTest {
         Integer result = (Integer) method.invoke(new CarDao(), connection, 10);
         //then
         assertTrue(result >= 0 && result < 10);
-
-        executeSqlScript("truncateTableCar.sql");
         factory.close();
     }
 
@@ -91,7 +90,6 @@ class CarDaoTest {
     @Test
     void itShouldReturnCarByIdFromCarOfTheDayTable() throws NoSuchMethodException, SQLException, InvocationTargetException, IllegalAccessException {
         //given (create car table with 2 cars)
-        executeSqlScript("createCarTable.sql");
         executeSqlScript("insertCarsIntoCarTable.sql");
         //when
         ConnectionFactory factory = new ConnectionFactory();
@@ -105,15 +103,13 @@ class CarDaoTest {
         assertEquals(testCar, car);
         assertEquals(testCar2, car2);
 
-        executeSqlScript("truncateTableCar.sql");
         factory.close();
     }
 
 
     @Test
     void itShouldInsertCarInCarOfTheDayTable() throws NoSuchMethodException, SQLException, InvocationTargetException, IllegalAccessException {
-        //given (create car table with 2 cars)
-        executeSqlScript("createCarOfTheDayTable.sql");
+        //given
         //when
         ConnectionFactory factory = new ConnectionFactory();
         Connection connection = factory.getConnection();
@@ -124,7 +120,6 @@ class CarDaoTest {
         //then
         assertTrue(1 == result);
 
-        executeSqlScript("deleteCarOfTheDayTable.sql");
         factory.close();
     }
 
@@ -132,7 +127,6 @@ class CarDaoTest {
     @Test
     void itShouldReturnPreviousCarOfTheDay() throws NoSuchMethodException, SQLException, InvocationTargetException, IllegalAccessException {
         //given (create car table with 2 cars)
-        executeSqlScript("createCarOfTheDayTable.sql");
         executeSqlScript("insertCarsIntoCarOfTheDayTable.sql");
         //when
         ConnectionFactory factory = new ConnectionFactory();
@@ -143,7 +137,6 @@ class CarDaoTest {
         //then
         assertEquals(testCar, car);
 
-        executeSqlScript("deleteCarOfTheDayTable.sql");
         factory.close();
     }
 
