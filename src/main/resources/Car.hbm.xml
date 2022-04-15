@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD//EN"
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="model.Car2" table="car">
+        <meta attribute="class-description">
+            This class contains developer's details.
+        </meta>
+        <id name="regNum" type="string" column="reg_num">
+        </id>
+        <property name="manufacturer" column="manufacturer" type="string"/>
+        <property name="model" column="model" type="string"/>
+        <property name="year" column="year" type="int"/>
+    </class>
+</hibernate-mapping>

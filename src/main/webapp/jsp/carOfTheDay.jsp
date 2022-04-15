@@ -1,4 +1,4 @@
-<%@ page import="model.Car" %>
+<%@ page import="model.Car2" %>
 <%@ page import="java.util.List" %>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page isELIgnored="false" %>
@@ -17,7 +17,7 @@
                 <div class="mdl-cell mdl-cell--4-col">
                     <div>
                         <%
-                            List<Car> listCar = (List<Car>) request.getAttribute("listCar");
+                            List<Car2> listCar = (List<Car2>) request.getAttribute("listCar");
                             if (listCar != null){
                         %>
 

@@ -1,24 +1,20 @@
 package dao;
 
 import model.Car;
-import org.junit.jupiter.api.AfterEach;
+import model.CarOfTheDay;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.id.IdentifierGenerationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 
 class CarDaoTest {
 
@@ -29,6 +25,16 @@ class CarDaoTest {
 
     @BeforeEach
     void init() {
+        final Session session = HibernateSessionFactory.getSession();
+        session.beginTransaction();
+        String truncateCar = "Truncate table car";
+        String truncateCarOfTheDay = "Truncate table car_of_the_day";
+        session.createSQLQuery(truncateCar).executeUpdate();
+        session.createSQLQuery(truncateCarOfTheDay).executeUpdate();
+        session.getTransaction().commit();
+        session.close();
+
+
         carDao = new CarDao();
 
         testCar = new Car();
@@ -43,213 +49,134 @@ class CarDaoTest {
         testCar2.setManufacturer("Ваз");
         testCar2.setModel("2101");
 
-        executeSqlScript("createCarTable.sql");
-        executeSqlScript("createCarOfTheDayTable.sql");
-    }
-
-
-    @AfterEach
-    void wipeData(){
-        executeSqlScript("createCarTable.sql");
-        executeSqlScript("createCarOfTheDayTable.sql");
-    }
-
-
-    @Test
-    void itShouldReturnNumberOfCarsInCarTable() throws NoSuchMethodException, SQLException, InvocationTargetException, IllegalAccessException {
-        //given (create car table with 2 cars)
-        executeSqlScript("insertCarsIntoCarTable.sql");
-        //when
-        ConnectionFactory factory = new ConnectionFactory();
-        Connection connection = factory.getConnection();
-        Method method = CarDao.class.getDeclaredMethod("getCounter", Connection.class);
-        method.setAccessible(true);
-        Integer result = (Integer) method.invoke(new CarDao(), connection);
-        //then
-        assertEquals(2, result);
-
-        factory.close();
     }
 
     @Test
-    void itShouldReturnRandomNumBetweenZeroAndGivenNumMinusOne() throws NoSuchMethodException, SQLException, InvocationTargetException, IllegalAccessException {
-        //given
-        //when
-        ConnectionFactory factory = new ConnectionFactory();
-        Connection connection = factory.getConnection();
-        Method method = CarDao.class.getDeclaredMethod("getRandomNum", Connection.class, Integer.TYPE);
-        method.setAccessible(true);
-        Integer result = (Integer) method.invoke(new CarDao(), connection, 10);
-        //then
-        assertTrue(result >= 0 && result < 10);
-        factory.close();
-    }
-
-
-    @Test
-    void itShouldReturnCarByIdFromCarOfTheDayTable() throws NoSuchMethodException, SQLException, InvocationTargetException, IllegalAccessException {
-        //given (create car table with 2 cars)
-        executeSqlScript("insertCarsIntoCarTable.sql");
-        //when
-        ConnectionFactory factory = new ConnectionFactory();
-        Connection connection = factory.getConnection();
-        Method method = CarDao.class.getDeclaredMethod("getCarOfTheDay", Connection.class, Integer.TYPE);
-        method.setAccessible(true);
-        Car car = (Car) method.invoke(new CarDao(), connection, 0);
-        Car car2 = (Car) method.invoke(new CarDao(), connection, 1);
-        //then
-
-        assertEquals(testCar, car);
-        assertEquals(testCar2, car2);
-
-        factory.close();
-    }
-
-
-    @Test
-    void itShouldInsertCarInCarOfTheDayTable() throws NoSuchMethodException, SQLException, InvocationTargetException, IllegalAccessException {
-        //given
-        //when
-        ConnectionFactory factory = new ConnectionFactory();
-        Connection connection = factory.getConnection();
-        Method insertCarOfTheDay = CarDao.class.getDeclaredMethod("insertCarOfTheDay", Connection.class, Car.class);
-        insertCarOfTheDay.setAccessible(true);
-        int result = (Integer) insertCarOfTheDay.invoke(new CarDao(), connection, testCar);
-
-        //then
-        assertTrue(1 == result);
-
-        factory.close();
-    }
-
-
-    @Test
-    void itShouldReturnPreviousCarOfTheDay() throws NoSuchMethodException, SQLException, InvocationTargetException, IllegalAccessException {
-        //given (create car table with 2 cars)
-        executeSqlScript("insertCarsIntoCarOfTheDayTable.sql");
-        //when
-        ConnectionFactory factory = new ConnectionFactory();
-        Connection connection = factory.getConnection();
-        Method method = CarDao.class.getDeclaredMethod("getPreviousCarOfTheDay", Connection.class);
-        method.setAccessible(true);
-        Car car = (Car) method.invoke(new CarDao(), connection);
-        //then
-        assertEquals(testCar, car);
-
-        factory.close();
-    }
-
-
-
-    @Test
-    void itShouldSaveCarToDatabaseAndFindIt() {
-        //given
-        //when
+    void itShouldSaveCarAndFindIt() {
         carDao.save(testCar);
-        Car carExpected = carDao.find(testCar.getRegNum()).orElse(new Car());
-        //then
-        assertEquals(testCar, carExpected);
-
-        carDao.delete(testCar);
+        Optional<Car> fromBase = carDao.find(testCar.getRegNum());
+        assertEquals(testCar, fromBase.get());
     }
 
     @Test
-    void itShouldFindAllCarsInDatabase() {
-        //given
+    void itShouldThrowIdentifierGenerationExceptionWhenRegNumIsNull() {
+        assertThrows(IdentifierGenerationException.class, () -> {
+            carDao.save(new Car());
+        });
+    }
+
+    @Test
+    void itShouldThrowNullPointerExceptionWhenKeyNotFound() {
+        assertThrows(NullPointerException.class, () -> {
+            Optional<Car> fromBase = carDao.find(testCar.getRegNum());
+        });
+    }
+
+    @Test
+    void itShouldThrowHibernateExceptionWhenKeysAreDuplicated() {
+        assertThrows(HibernateException.class, () -> {
+            carDao.save(testCar);
+            carDao.save(testCar);
+        });
+    }
+
+
+    @Test
+    void itShouldReturnListOfCars() {
         carDao.save(testCar);
         carDao.save(testCar2);
-        //when
-        List<Car> carList = carDao.findAll();
-        //then
-        carList.forEach(car ->
-                assertTrue(car.equals(testCar) || car.equals(testCar2)));
-        carList.forEach(carDao::delete);
+        List<Car> returned = carDao.findAll();
+        assertEquals(testCar, returned.get(0));
+        assertEquals(testCar2, returned.get(1));
     }
 
     @Test
-    void itShouldUpdateCarInDatabase() {
-        //given
+    void itShouldUpdateCar() {
         carDao.save(testCar);
-        //when
-        String newModel = "newModel";
-        testCar.setModel(newModel);
+        String expected = "TEST_MANUFACTURER";
+        testCar.setManufacturer(expected);
         carDao.update(testCar);
-        //then
-        Car result = carDao.find(testCar.getRegNum()).orElse(new Car());
-        assertEquals(newModel, result.getModel());
-        carDao.delete(testCar);
-        testCar.setModel("X5");
+        Optional<Car> fromBase = carDao.find(testCar.getRegNum());
+        assertEquals(expected, fromBase.get().getManufacturer());
     }
 
     @Test
-    void itShouldDeleteCarInDatabase() {
-        //given
+    void itShouldDeleteCar() {
         carDao.save(testCar);
-        //when
+        carDao.save(testCar2);
+        List<Car> returned = carDao.findAll();
+        assertTrue(returned.contains(testCar));
         carDao.delete(testCar);
-        //then
-        Car result = carDao.find(testCar.getRegNum()).orElse(null);
-        assertNull(result.getModel());
-        assertNull(result.getRegNum());
-        assertNull(result.getManufacturer());
-        assertEquals(0, result.getYear());
+        returned = carDao.findAll();
+        assertFalse(returned.contains(testCar));
     }
 
-    private void executeSqlScript(String fileName) {
-        Connection conn = null;
-        ConnectionFactory cf = new ConnectionFactory();
-        try {
-            conn = cf.getConnection();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
 
+    @Test
+    void itShouldReturnCounterOfCars() {
+        carDao.save(testCar);
+        carDao.save(testCar2);
 
-        File inputFile = null;
-        final URL url = this.getClass().getClassLoader().getResource(fileName);
-        try {
-            inputFile = new File(url.toURI());
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
+        final Session session = HibernateSessionFactory.getSession();
+        final Transaction transaction = session.beginTransaction();
 
-        // Delimiter
-        String delimiter = ";";
+        Integer value = carDao.getCounter(session);
+        transaction.commit();
+        session.close();
 
-        // Create scanner
-        Scanner scanner;
-        try {
-            scanner = new Scanner(inputFile).useDelimiter(delimiter);
-        } catch (FileNotFoundException e1) {
-            e1.printStackTrace();
-            return;
-        }
-
-        // Loop through the SQL file statements
-        Statement currentStatement = null;
-        while (scanner.hasNext()) {
-
-            // Get statement
-            String rawStatement = scanner.next() + delimiter;
-            try {
-                // Execute statement
-                currentStatement = conn.createStatement();
-                currentStatement.execute(rawStatement);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            } finally {
-                // Release resources
-                if (currentStatement != null) {
-                    try {
-                        currentStatement.close();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }
-                currentStatement = null;
-            }
-        }
-        scanner.close();
-        cf.close();
+        assertEquals(2,value);
     }
+
+    @Test
+    void itShouldReturnRandomNum() {
+        final Session session = HibernateSessionFactory.getSession();
+        final Transaction transaction = session.beginTransaction();
+
+        for (int i = 0; i < 100; i++) {
+            Integer value = carDao.getRandomNum(session, 10);
+            assertTrue(value >= 0 && value <10);
+        }
+        transaction.commit();
+        session.close();
+    }
+
+    @Test
+    void itShouldReturnCarOfTheDay(){
+        List<Car> carList = new ArrayList<>();
+        carList.add(testCar);
+        carList.add(testCar2);
+        carList.forEach(carDao::save);
+        final Session session = HibernateSessionFactory.getSession();
+        final Transaction transaction = session.beginTransaction();
+
+        Car carOfTheDay = carDao.getCarOfTheDay(session, 0);
+        assertEquals(testCar, carOfTheDay);
+        carOfTheDay = carDao.getCarOfTheDay(session, 1);
+        assertEquals(testCar2, carOfTheDay);
+        transaction.commit();
+        session.close();
+
+    }
+
+    @Test
+    void itShouldInsertCarOfTheDay(){
+
+        final Session session = HibernateSessionFactory.getSession();
+        final Transaction transaction = session.beginTransaction();
+
+        carDao.insertCarOfTheDay(session, testCar);
+        List<CarOfTheDay> carOfTheDayList = session.createQuery("from CarOfTheDay ").list();
+        System.out.println(carOfTheDayList.size());
+        CarOfTheDay fromDB = carOfTheDayList.get(carOfTheDayList.size()-1);
+
+        assertEquals(testCar.getRegNum(), fromDB.getRegNum());
+
+        transaction.commit();
+        session.close();
+
+    }
+
+
+
+
 }
