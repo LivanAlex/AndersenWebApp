@@ -13,13 +13,17 @@ public class HibernateSessionFactory {
     private static SessionFactory sessionFactory;
 
     static {
-        Configuration configuration = new Configuration().configure();
-        configuration.addAnnotatedClass(Car.class);
-        configuration.addAnnotatedClass(CarOfTheDay.class);
-        StandardServiceRegistryBuilder builder =
-                new StandardServiceRegistryBuilder()
-                        .applySettings(configuration.getProperties());
-        sessionFactory = configuration.buildSessionFactory(builder.build());
+        try {
+            Configuration configuration = new Configuration().configure();
+            configuration.addAnnotatedClass(Car.class);
+            configuration.addAnnotatedClass(CarOfTheDay.class);
+            StandardServiceRegistryBuilder builder =
+                    new StandardServiceRegistryBuilder()
+                            .applySettings(configuration.getProperties());
+            sessionFactory = configuration.buildSessionFactory(builder.build());
+        } catch (Exception exception){
+            exception.printStackTrace();
+        }
     }
 
     private HibernateSessionFactory() {

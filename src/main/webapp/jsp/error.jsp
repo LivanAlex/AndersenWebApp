@@ -12,7 +12,7 @@
     <main class="mdl-layout__content">
         <div class="page-content">
             <div class="mdl-grid center-items">
-                <h3>Шеф! Все пропало!</h3>
+                <h3>Шеф! Все пропало!</h3
             </div>
         </div>
     </main>

@@ -1,8 +1,17 @@
 package model;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
 import javax.persistence.*;
 
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
+@ToString
 @Table(name = "car_of_the_day")
 public class CarOfTheDay {
     @Id
@@ -22,44 +31,12 @@ public class CarOfTheDay {
     @Column(name = "year")
     private Integer year;
 
-    public Integer getId() {
-        return id;
+    public Car getCar(){
+        Car car= new Car();
+        car.manufacturer = manufacturer;
+        car.model = model;
+        car.regNum = regNum;
+        car.year = year;
+        return car;
     }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getRegNum() {
-        return regNum;
-    }
-
-    public void setRegNum(String regNum) {
-        this.regNum = regNum;
-    }
-
-    public String getManufacturer() {
-        return manufacturer;
-    }
-
-    public void setManufacturer(String manufacturer) {
-        this.manufacturer = manufacturer;
-    }
-
-    public String getModel() {
-        return model;
-    }
-
-    public void setModel(String model) {
-        this.model = model;
-    }
-
-    public Integer getYear() {
-        return year;
-    }
-
-    public void setYear(Integer year) {
-        this.year = year;
-    }
-
 }

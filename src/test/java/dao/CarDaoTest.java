@@ -2,14 +2,13 @@ package dao;
 
 import model.Car;
 import model.CarOfTheDay;
-import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.id.IdentifierGenerationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.InvocationTargetException;
+import javax.persistence.PersistenceException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -74,7 +73,7 @@ class CarDaoTest {
 
     @Test
     void itShouldThrowHibernateExceptionWhenKeysAreDuplicated() {
-        assertThrows(HibernateException.class, () -> {
+        assertThrows(PersistenceException.class, () -> {
             carDao.save(testCar);
             carDao.save(testCar);
         });
@@ -116,6 +115,7 @@ class CarDaoTest {
     void itShouldReturnCounterOfCars() {
         carDao.save(testCar);
         carDao.save(testCar2);
+
 
         final Session session = HibernateSessionFactory.getSession();
         final Transaction transaction = session.beginTransaction();
@@ -175,6 +175,42 @@ class CarDaoTest {
         session.close();
 
     }
+
+    @Test
+    void itShouldReturnPreviousCarOfTheDay(){
+        final Session session = HibernateSessionFactory.getSession();
+        final Transaction transaction = session.beginTransaction();
+
+        carDao.insertCarOfTheDay(session, testCar2);
+        carDao.insertCarOfTheDay(session, testCar2);
+        carDao.insertCarOfTheDay(session, testCar2);
+        carDao.insertCarOfTheDay(session, testCar2);
+        carDao.insertCarOfTheDay(session, testCar2);
+        carDao.insertCarOfTheDay(session, testCar);
+        carDao.insertCarOfTheDay(session, testCar2);
+
+        CarOfTheDay fromDB = carDao.getPreviousCarOfTheDay(session);
+        assertEquals(testCar.getRegNum(), fromDB.getRegNum());
+
+        transaction.commit();
+        session.close();
+    }
+
+    @Test
+    void itShouldReturnNull(){
+        final Session session = HibernateSessionFactory.getSession();
+        final Transaction transaction = session.beginTransaction();
+
+        CarOfTheDay fromDB = carDao.getPreviousCarOfTheDay(session);
+        assertNull(fromDB);
+
+        transaction.commit();
+        session.close();
+    }
+
+
+
+
 
 
 

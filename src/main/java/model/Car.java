@@ -16,19 +16,19 @@ public class Car {
 
     @Id
     @Column(name = "reg_num", nullable = false, length = 15)
-    private String regNum;
+    protected String regNum;
 
 
     @Column(name = "manufacturer", length = 30)
-    private String manufacturer;
+    protected String manufacturer;
 
 
     @Column(name = "model", length = 30)
-    private String model;
+    protected String model;
 
 
     @Column(name = "year")
-    private Integer year;
+    protected Integer year;
 
 
 }

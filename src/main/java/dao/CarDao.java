@@ -7,7 +7,6 @@ import org.hibernate.Transaction;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -64,6 +63,7 @@ public class CarDao implements Dao<Car, String> {
         Session session = HibernateSessionFactory.getSession();
         Transaction transaction = session.beginTransaction();
 
+        try{
         //1. get count of all cars
         int counter = getCounter(session);
         //2. get random num
@@ -72,65 +72,20 @@ public class CarDao implements Dao<Car, String> {
         Car carOfTheDay = getCarOfTheDay(session, randomNum);
         //4. insert car of the day on car_of_the_day table
         insertCarOfTheDay(session, carOfTheDay);
+        //5. get number of previous car
+        CarOfTheDay previousCarOfTheDay = getPreviousCarOfTheDay(session);
+        carOfTheDayList.add(carOfTheDay);
+        carOfTheDayList.add(previousCarOfTheDay.getCar());
+        transaction.commit();
 
-
-//
-//
-//            //5. get number of previous car
-//            Car previousCarOfTheDay = getPreviousCarOfTheDay(connection);
-//
-//            carOfTheDayList.add(carOfTheDay);
-//            carOfTheDayList.add(previousCarOfTheDay);
-//
-//            connection.commit();
-//
-//        } catch (SQLException e) {
-//            try {
-//                connection.rollback();
-//                return null;
-//            } catch (SQLException ex) {
-//                ex.printStackTrace();
-//            }
-//            e.printStackTrace();
-//        }
-
-
+        } catch (Exception e) {
+            transaction.rollback();
+            return null;
+        } finally {
+            session.close();
+        }
         return carOfTheDayList;
-    }
 
-    private Car getPreviousCarOfTheDay(Connection connection) throws SQLException {
-        ResultSet resultSet;
-        String sql;
-        Statement statement;
-        Car previousCarOfTheDay = null;
-        sql = "select * from car_of_the_day order by id desc offset 1 limit 1;";
-        statement = connection.createStatement();
-        resultSet = statement.executeQuery(sql);
-        if (resultSet.next()) {
-            final String regNum = resultSet.getString("reg_num");
-            final String manufacturer = resultSet.getString("manufacturer");
-            final String model = resultSet.getString("model");
-            final int year = resultSet.getInt("year");
-            final int id = resultSet.getInt("id");
-            previousCarOfTheDay = new Car();
-            previousCarOfTheDay.setManufacturer(manufacturer);
-            previousCarOfTheDay.setRegNum(regNum);
-            previousCarOfTheDay.setModel(model);
-            previousCarOfTheDay.setYear(year);
-        }
-
-        if (previousCarOfTheDay == null) {
-            throw new SQLException("can't get previousCarOfTheDay");
-        }
-        return previousCarOfTheDay;
-    }
-
-    public void insertCarOfTheDay(Session session, Car car){
-        CarOfTheDay carOfTheDay = new CarOfTheDay();
-        carOfTheDay.setManufacturer(car.getManufacturer());
-        carOfTheDay.setModel(car.getModel());
-        carOfTheDay.setYear(car.getYear());
-        session.save(carOfTheDay);
     }
 
 
@@ -151,5 +106,29 @@ public class CarDao implements Dao<Car, String> {
 
     public Car getCarOfTheDay(Session session, int randomNum) {
         return (Car) session.createQuery("from Car").list().get(randomNum);
+    }
+
+    public void insertCarOfTheDay(Session session, Car car) {
+        CarOfTheDay carOfTheDay = new CarOfTheDay();
+        carOfTheDay.setManufacturer(car.getManufacturer());
+        carOfTheDay.setRegNum(car.getRegNum());
+        carOfTheDay.setModel(car.getModel());
+        carOfTheDay.setYear(car.getYear());
+        session.save(carOfTheDay);
+    }
+
+    @SuppressWarnings("unchecked")
+    public CarOfTheDay getPreviousCarOfTheDay(Session session) {
+        CarOfTheDay carOfTheDay = null;
+        List<CarOfTheDay> carOfTheDayList =
+                (List<CarOfTheDay>) session
+                        .createQuery("select c from CarOfTheDay c order by c.id desc ")
+                        .setFirstResult(1)
+                        .setMaxResults(1)
+                        .getResultList();
+        if (carOfTheDayList.size() == 1) {
+            carOfTheDay = carOfTheDayList.get(0);
+        }
+        return carOfTheDay;
     }
 }
